@@ -12,8 +12,9 @@ beforeAll( async done => {
     done();
 });
 
-afterAll(done => {
-    db.disconnect();
+afterAll(async done => {
+    await cleanUp();
+    await db.disconnect();
     done();
 });
 
@@ -44,3 +45,11 @@ describe('GET /:id', () => {
         expect(redirectedURL).toMatch(url);
     });
 });
+
+// Remove all the elements from test database
+async function cleanUp() {
+    const Link = require('../models/link');
+    const UriStorage = require('../models/uriStorage');
+    await Link.deleteMany();
+    await UriStorage.deleteMany();
+}
