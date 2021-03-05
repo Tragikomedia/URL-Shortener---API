@@ -8,7 +8,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 
 // Routes
-const apiRouter = require('./routes/api');
-app.use('/api', apiRouter);
+const apiRouter = require('./routes/index');
+app.use('/', apiRouter);
 
 module.exports = app;
