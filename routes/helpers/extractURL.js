@@ -1,4 +1,4 @@
-const shortUrlRegExp = /[a-zA-Z0-9@:%._\\+~#?&/=]{2,256}\.[a-z]{2,6}([-a-zA-Z0-9@:%._\\+~#?&//=]*)$/
-const extractTargetUrl = url => shortUrlRegExp.exec(url)[0];
+const shortUrlRegExp = /^((http|https):\/\/)?(www.)?(.*)$/
+const extractTargetUrl = url => shortUrlRegExp.exec(url)[4];
 
 module.exports = { extractTargetUrl };
