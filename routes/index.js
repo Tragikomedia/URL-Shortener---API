@@ -2,6 +2,7 @@ const router = require('express').Router();
 
 const { validURL, validInternalURI } = require('./helpers/validation');
 const { generateUniqueURI } = require('./helpers/generateURI');
+const { extractTargetUrl } = require('./helpers/extractURL');
 const Link = require('../models/link');
 const UriStorage = require('../models/uriStorage');
 
@@ -15,8 +16,9 @@ router.post('/', async (req, res) => {
     const uriStorage = await UriStorage.findOne();
     if (!uriStorage) return res.json({error: 'Internal server error: cannot reach database'});
     try {
+        const targetURL = extractTargetUrl(url);
         const shortURI = await generateUniqueURI(uriStorage);
-        const link = new Link({targetURL: url, shortURI});
+        const link = new Link({targetURL, shortURI});
         await link.save();
         res.json({uri: shortURI});
     } catch (error) {
