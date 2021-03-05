@@ -11,7 +11,7 @@ router.post('/', async (req, res) => {
     if (!validURL(url)) return res.json({error: 'Invalid URL'});
     // Proceed only if storage is accessible
     const uriStorage = await UriStorage.findOne();
-    if (!uriStorage) return res.json({error: 'Internal server error'});
+    if (!uriStorage) return res.json({error: 'Internal server error: cannot reach database'});
     try {
         const shortURI = await generateUniqueURI(uriStorage);
         const link = new Link({targetURL: url, shortURI});
