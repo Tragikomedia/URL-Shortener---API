@@ -34,7 +34,7 @@ router.get('/:id', async (req, res) => {
     const link = await Link.findOne({shortURI: id});
     if (!link) return res.json({error: 'Link does not exist'});
     const url = link.targetURL;
-    res.redirect(url);
+    res.redirect(`https://${url}`);
 });
 
 
