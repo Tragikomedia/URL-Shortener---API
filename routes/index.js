@@ -1,10 +1,12 @@
 const router = require('express').Router();
 
-const { validURL } = require('./helpers/validateURL');
+const { validURL, validInternalURI } = require('./helpers/validation');
 const { generateUniqueURI } = require('./helpers/generateURI');
 const Link = require('../models/link');
 const UriStorage = require('../models/uriStorage');
 
+// POST /
+// @desc Post a link to be shortened, receive URI
 router.post('/', async (req, res) => {
     // Validate url
     const { url } = req.body;
@@ -16,14 +18,21 @@ router.post('/', async (req, res) => {
         const shortURI = await generateUniqueURI(uriStorage);
         const link = new Link({targetURL: url, shortURI});
         await link.save();
-        res.json({message: shortURI});
+        res.json({uri: shortURI});
     } catch (error) {
         return res.json({error: `Internal server error: ${error}`});
     }
 })
 
-router.get('/:id', (req, res) => {
-
+// GET /:id
+// @desc Access URI, get redirected to the stored URL
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    if (!validInternalURI(id)) return res.json({error: 'Invalid parameters'});
+    const link = await Link.findOne({shortURI: id});
+    if (!link) return res.json({error: 'Link does not exist'});
+    const url = link.targetURL;
+    res.redirect(url);
 });
 
 
