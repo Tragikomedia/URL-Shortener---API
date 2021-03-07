@@ -1,5 +1,7 @@
 const passport = require('passport');
 const FacebookStrategy = require('passport-facebook').Strategy;
+const JWTStrategy = require('passport-jwt').Strategy;
+const ExtractJwt = require('passport-jwt').ExtractJwt;
 const User = require('../models/user');
 
 // Facebook Strategy
@@ -11,7 +13,7 @@ const facebookStrategy = new FacebookStrategy({
 async function(accessToken, refreshToken, profile, done) {
     let user;
     try {
-        user = await User.findOne({externalId: profile.id});
+        user = await User.findOne({externalId: profile.id, provider: 'Facebook'});
         if (!user) {
             user = new User({
                 externalId: profile.id,
@@ -26,6 +28,24 @@ async function(accessToken, refreshToken, profile, done) {
     }
 });
 
+// JWT Strategy
+const opts = {
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+    secretOrKey: process.env.JWT_SECRET,
+}
+const jwtStrategy = new JWTStrategy(opts, async function(jwt_payload, done) {
+    try {
+        const user = await User.findById(jwt_payload.id);
+        if (!user) {
+            return done(null, false);
+        }
+        done(null, user);
+    } catch (error) {
+        done(error);
+    }
+});
+
 passport.use(facebookStrategy);
+passport.use(jwtStrategy);
 
 module.exports = passport;
