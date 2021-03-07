@@ -16,9 +16,11 @@ app.use(express.urlencoded({extended: false}));
 app.use(passport.initialize());
 
 // Routes
-const apiRouter = require('./routes/index');
+const apiRouter = require('./routes/api');
 const authRouter = require('./routes/auth');
+const userRouter = require('./routes/user');
 app.use('/auth', authRouter);
+app.use('/user', userRouter);
 app.use('/', apiRouter);
 
 module.exports = app;
