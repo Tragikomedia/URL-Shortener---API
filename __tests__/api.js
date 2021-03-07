@@ -7,6 +7,9 @@ const request = require('supertest')(app);
 const db = require('../config/db');
 const uriStorage = require('../config/uriStorage');
 
+const User = require('../models/user');
+const { signJWT } = require('../routes/helpers/jwt');
+
 beforeAll( async done => {
     await db.connect()
     await uriStorage.initialize();
@@ -47,10 +50,46 @@ describe('GET /:id', () => {
     });
 });
 
+describe('GET /user/all', () => {
+    it('Given a proper JWT of a valid user, should list all links of the user', async () => {
+        // Creating a user is necessary due to authentication
+        const user = new User({externalId: 'aabb546', provider: 'Facebook', name: 'Somebody'});
+        await user.save();
+        const token = signJWT(user);
+        // Post links
+        const url1 = 'wykop.pl';
+        const url2 = 'facebook.com';
+        await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url1});
+        await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url2});
+        // Get a list of links
+        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const { links } = res.body;
+        if(links.length === 0) console.log(res);
+        expect(links.length).toBe(2);
+        expect(links.find(link => link.targetURL === url1)).toBeTruthy();
+        expect(links.find(link => link.targetURL === url2)).toBeTruthy();
+    });
+    it('Given a fake JWT, should get status Unauthorized', async () => {
+        const user = new User({externalId: 'aueufe', provider: 'Facebook', name: 'Nobody'});
+        const token = signJWT(user);
+        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(res.status).toBe(401);
+    });
+    it('Given no JWT, should get status Unauthorized', async () => {
+        const res = await request.get('/user/all').set('Content-Type', 'application/json');
+        expect(res.status).toBe(401);
+    });
+});
+
+
+// All the tests that meddle with Db should be in one place
+// Otherwise, they might clean the Db while other tests are being processed
+
 // Remove all the elements from test database
 async function cleanUp() {
     const Link = require('../models/link');
     const UriStorage = require('../models/uriStorage');
     await Link.deleteMany();
     await UriStorage.deleteMany();
+    await User.deleteMany();
 }
