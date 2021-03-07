@@ -1,4 +1,5 @@
 process.env.NODE_ENV = "test";
+require('dotenv').config();
 
 const app = require('../server');
 const request = require('supertest')(app);
@@ -42,7 +43,7 @@ describe('GET /:id', () => {
         expect(uri).toMatch(/^[a-z0-9]{7}$/);
         const getRes = await request.get(`/${uri}`);
         const redirectedURL = getRes.headers?.location;
-        expect(redirectedURL).toMatch(url);
+        expect(redirectedURL).toMatch('https://wykop.pl');
     });
 });
 
