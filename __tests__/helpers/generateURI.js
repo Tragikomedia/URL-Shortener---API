@@ -18,7 +18,8 @@ afterAll(done => {
 describe('Unique URI generation', () => {
     it('Given access to storage, should generate unique URI', async () => {
         const storage = await UriStorage.findOne();
-        const uri = await generateUniqueURI(storage);
-        expect(uri).toMatch(/^[a-z0-9]{7}$/);
+        const {error, shortURI} = await generateUniqueURI(storage);
+        expect(error).toBeFalsy();
+        expect(shortURI).toMatch(/^[a-z0-9]{7}$/);
     });
 });

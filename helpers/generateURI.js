@@ -4,20 +4,19 @@ const uriLength = 7;
 
 const generateUniqueURI = async (uriStorage) => {
     const storedURIs = uriStorage.uris;
-    let newURI = generateShortURI();
-    let isUnique = !storedURIs.includes(newURI);
+    let shortURI = generateShortURI();
+    let isUnique = !storedURIs.includes(shortURI);
     while(!isUnique) {
-        newURI = modifyUriAtRandom(newURI);
-        isUnique = !storedURIs.includes(newURI);
+        shortURI = modifyUriAtRandom(shortURI);
+        isUnique = !storedURIs.includes(shortURI);
     }
-    uriStorage.uris.push(newURI);
+    uriStorage.uris.push(shortURI);
     try {
         await uriStorage.save();
     } catch (error) {
-        console.log(error);
-        throw new Error('Error while saving storage');   
+        return {error}; 
     }
-    return newURI;
+    return {shortURI};
 }
 function modifyUriAtRandom(uri) {
     const indexOfChange = Math.floor(Math.random() * uriLength);
