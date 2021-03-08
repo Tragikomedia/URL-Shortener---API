@@ -66,4 +66,10 @@ linkSchema.statics.findByUri = async function(uri) {
     return {link};
 }
 
+linkSchema.statics.findByUserId = async function(id) {
+    if (!id) return [];
+    const links = await this.find({user: id}).exec();
+    return links;
+}
+
 module.exports = model('Link', linkSchema);
