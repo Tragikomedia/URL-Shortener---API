@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { signJWT, verifyJWT } = require('../../routes/helpers/jwt');
+const { signJWT, verifyJWT } = require('../../helpers/jwt');
 const User = require('../../models/user');
 
 describe('JWT', () => {

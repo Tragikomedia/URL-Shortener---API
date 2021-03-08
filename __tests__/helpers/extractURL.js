@@ -1,4 +1,4 @@
-const { extractTargetUrl } = require('../../routes/helpers/extractURL');
+const { extractTargetUrl } = require('../../helpers/extractURL');
 
 describe('Extract target url from proper input', () => {
     it('Given an already short target url, should return it', () => {

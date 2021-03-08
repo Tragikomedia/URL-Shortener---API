@@ -1,4 +1,4 @@
-const { validURL, validInternalURI } = require('../../routes/helpers/validation');
+const { validURL, validInternalURI } = require('../../helpers/validation');
 
 describe('URL Validation - invalid', () => {
     it('Given url with space, should equal false', () => {

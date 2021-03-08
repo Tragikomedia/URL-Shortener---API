@@ -1,4 +1,4 @@
-const { generateUniqueURI } = require('../../routes/helpers/generateURI');
+const { generateUniqueURI } = require('../../helpers/generateURI');
 
 const db = require('../../config/db');
 const uriStorage = require('../../config/uriStorage');
