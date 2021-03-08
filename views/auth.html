@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Authentication</title>
+</head>
+<body>
+    Authenticated successfully.
+    <script type="text/javascript">
+        window.opener.postMessage('{{token}}', 'http://127.0.0.1:5500/');
+        window.close();
+    </script>
+</body>
+
+</html>
