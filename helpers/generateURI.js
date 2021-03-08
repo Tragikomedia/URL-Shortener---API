@@ -1,6 +1,15 @@
+const UriStorage = require('../models/uriStorage');
+
 const chars = "1234567890qwertyuiopasdfghjklzxcvbnm";
 const charsLen = chars.length;
 const uriLength = 7;
+
+const getUri = async () => {
+    // Proceed only if storage is accessible!
+    const uriStorage = await UriStorage.findOne();
+    if (!uriStorage) return {error: 'Internal server error: cannot reach database'};
+    return await generateUniqueURI(uriStorage);
+}
 
 const generateUniqueURI = async (uriStorage) => {
     const storedURIs = uriStorage.uris;
@@ -34,4 +43,4 @@ function generateShortURI() {
     return uri;
 }
 
-module.exports = { generateUniqueURI };
+module.exports = { generateUniqueURI, getUri };
