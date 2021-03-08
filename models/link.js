@@ -55,9 +55,9 @@ linkSchema.methods.expire = async function() {
 
 // Querying
 const { validInternalURI } = require('../helpers/validation');
-linkSchema.static.findByUri = async function(uri) {
+linkSchema.statics.findByUri = async function(uri) {
     if (!validInternalURI(uri)) return {error: 'Invalid link ID'};
-    const link = await Link.findOne({shortURI: uri});
+    const link = await this.findOne({shortURI: uri});
     if (!link) return {error: 'Link does not exist'};
     if (link.isExpired()) {
         await link.expire();
