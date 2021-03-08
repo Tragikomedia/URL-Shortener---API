@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const passport = require('passport');
-const { signJWT } = require('./helpers/jwt');
+const { signJWT } = require('../helpers/jwt');
 
 // GET /facebook
 // @desc Login via Facebook
@@ -21,7 +21,6 @@ router.get('/google/callback', passport.authenticate('google', {
 }), passTokenToClient);
 
 function passTokenToClient(req, res) {
-    console.log(req.user);
     const token = signJWT(req.user);
     // You render a view where script passes the token to client via postMessage
     res.render('auth.html', {token});
