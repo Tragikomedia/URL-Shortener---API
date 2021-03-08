@@ -23,6 +23,6 @@ const getLinkData = async (link, mode = 'brief') => {
 };
 
 // Without Promise.all parseLinks and other async maps return an array of promises
-const parseLinks = async links => await Promise.all(links.map(getLinkData));
+const extractData = async links => await Promise.all(links.map(getLinkData));
 
-module.exports = { parseLinks, getLinkData };
+module.exports = { extractData, getLinkData };
