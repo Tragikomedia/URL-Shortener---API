@@ -8,7 +8,7 @@ const db = require('../config/db');
 const uriStorage = require('../config/uriStorage');
 
 const User = require('../models/user');
-const { signJWT } = require('../routes/helpers/jwt');
+const { signJWT } = require('../helpers/jwt');
 
 beforeAll( async done => {
     await db.connect()
@@ -63,11 +63,10 @@ describe('GET /user/all', () => {
         await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url2});
         // Get a list of links
         const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
-        const { links } = res.body;
-        if(links.length === 0) console.log(res);
-        expect(links.length).toBe(2);
-        expect(links.find(link => link.targetURL === url1)).toBeTruthy();
-        expect(links.find(link => link.targetURL === url2)).toBeTruthy();
+        const { linksData } = res.body;
+        expect(linksData.length).toBe(2);
+        expect(linksData.find(link => link.targetURL === url1)).toBeTruthy();
+        expect(linksData.find(link => link.targetURL === url2)).toBeTruthy();
     });
     it('Given a fake JWT, should get status Unauthorized', async () => {
         const user = new User({externalId: 'aueufe', provider: 'Facebook', name: 'Nobody'});
