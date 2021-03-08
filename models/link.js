@@ -33,6 +33,8 @@ const linkSchema = new Schema({
         default: Date.now
     }
 });
+
+// Expiration
 const checkLinkExpiration = link => (link.maxClicks && link.maxClicks < link.clicks.length) || (link.expiresAt && link.expiresAt < Date.now());
 
 linkSchema.methods.isExpired = function() {
@@ -41,12 +43,27 @@ linkSchema.methods.isExpired = function() {
 }
 
 linkSchema.methods.expire = async function() {
-    this.expired = true;
-    try {
-        await this.save();
-    } catch (error) {
-        return {error};
+    if (!this.expired) {
+        this.expired = true;
+        try {
+            await this.save();
+        } catch (error) {
+            return {error};
+        }
     }
+}
+
+// Querying
+const { validInternalURI } = require('../helpers/validation');
+linkSchema.static.findByUri = async function(uri) {
+    if (!validInternalURI(uri)) return {error: 'Invalid link ID'};
+    const link = await Link.findOne({shortURI: uri});
+    if (!link) return {error: 'Link does not exist'};
+    if (link.isExpired()) {
+        await link.expire();
+        return {error: 'Expired link'};
+    };
+    return {link};
 }
 
 module.exports = model('Link', linkSchema);
