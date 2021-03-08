@@ -72,4 +72,13 @@ linkSchema.statics.findByUserId = async function(id) {
     return links;
 }
 
+// Creation
+const { getLinkParams } = require('../helpers/linkParams');
+linkSchema.statics.fromReq = async function(req) {
+    const { error, params } = await getLinkParams(req);
+    if (error) return {error};
+    const link = new this(params);
+    return {link};
+}
+
 module.exports = model('Link', linkSchema);
