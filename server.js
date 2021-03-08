@@ -5,7 +5,7 @@ const app = express();
 const mustacheExpress = require('mustache-express');
 app.engine('html', mustacheExpress());
 app.set('view engine', 'mustache');
-app.set('views', __dirname + '/public');
+app.set('views', __dirname + '/views');
 
 // Middlewares
 const cors = require('cors');
