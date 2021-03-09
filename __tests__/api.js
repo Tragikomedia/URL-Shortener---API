@@ -8,6 +8,8 @@ const db = require('../config/db');
 const uriStorage = require('../config/uriStorage');
 
 const User = require('../models/user');
+const Link = require('../models/link');
+const Click = require('../models/click');
 const { signJWT } = require('../helpers/jwt');
 
 beforeAll( async done => {
@@ -69,7 +71,7 @@ describe('GET /:id', () => {
     it('Send correct uri of a link that expired, should receive error message', async () => {
         const url = 'www.example.be';
         const options = {
-            expiresAt: Date('1999','07','13')
+            expiresAt: new Date('1999','07','13')
         };
         const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
         const uri = postRes.body.uri;
@@ -109,6 +111,69 @@ describe('GET /user/all', () => {
     it('Given no JWT, should get status Unauthorized', async () => {
         const res = await request.get('/user/all').set('Content-Type', 'application/json');
         expect(res.status).toBe(401);
+    });
+});
+
+describe('GET /user/:id', () => {
+    it('Given a URI of basic fresh link, should return brief linkData', async () => {
+        const user = new User({externalId: 'cccbbn34', provider: 'Facebook', name: 'Nobody Important'});
+        await user.save();
+        const targetURL = 'example.info';
+        const shortURI = 'erew45k';
+        const link = new Link({
+            targetURL,
+            shortURI,
+            user: user.id
+        });
+        await link.save();
+        const token = signJWT(user);
+        const res = await request.get(`/user/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const {linkData} = res.body;
+        expect(linkData).toBeTruthy();
+        expect(linkData.targetURL).toMatch(targetURL);
+        expect(linkData.shortURI).toMatch(shortURI);
+        expect(linkData.clicks.length).toBe(0);
+        expect(linkData.expiresAt).toBeFalsy();
+        expect(linkData.maxClicks).toBeFalsy();
+    });
+    it('Given a URI of a used link, should return detailed linkData', async () => {
+        const user = new User({externalId: 'cc33bn34', provider: 'Facebook', name: 'No-body Important'});
+        await user.save();
+        const targetURL = 'example.uk';
+        const shortURI = 'empre32';
+        const link = new Link({
+            targetURL,
+            shortURI,
+            user: user.id,
+            expiresAt: new Date('2040'),
+            maxClicks: 15
+        });
+        const click1 = new Click();
+        const click2 = new Click();
+        link.clicks.push(click1.id);
+        link.clicks.push(click2.id);
+        await link.save();
+        const token = signJWT(user);
+        const res = await request.get(`/user/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const {linkData} = res.body;
+        expect(linkData).toBeTruthy();
+        expect(linkData.targetURL).toMatch(targetURL);
+        expect(linkData.shortURI).toMatch(shortURI);
+        expect(linkData.clicks.length).toBe(2);
+        expect(new Date(linkData.expiresAt)).toEqual(new Date('2040'));
+        expect(linkData.maxClicks).toBe(15);
+    });
+    it('Given a request made by an unauthorized user, should receive status Unauthorized', async () => {
+        const res = await request.get('/user/aabbcce').set('Content-Type', 'application/json');
+        expect(res.status).toBe(401);
+    });
+    it('Given a request pointing at uri of non-existent link, should receive error', async () => {
+        const user = new User({externalId: 'cc32bn34', provider: 'Facebook', name: 'Nbody Important'});
+        await user.save();
+        const token = signJWT(user);
+        const res = await request.get(`/user/buba691`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(res.body.error).toBeTruthy();
+        expect(res.body.linkData).toBeUndefined();
     });
 });
 
