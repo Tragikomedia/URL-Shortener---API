@@ -2,6 +2,18 @@ const { extractData, getLinkData } = require('../../helpers/linkData');
 const Click = require('../../models/click');
 const Link = require('../../models/link');
 
+const db = require('../../config/db');
+
+beforeAll( async done => {
+    await db.connect()
+    done();
+});
+
+afterAll(done => {
+    db.disconnect();
+    done();
+});
+
 describe('getLinkData', () => {
     it('Given a link in default mode, should return brief data', async () => {
         const targetURL = 'example.org';
@@ -17,6 +29,26 @@ describe('getLinkData', () => {
         expect(linkData.shortURI).toMatch(shortURI);
         expect(linkData.user).toBeFalsy();
         expect(linkData.maxClicks).toBeFalsy();
+    });
+    it('Given a link in exhaustive mode, should return detailed data', async () => {
+        const targetURL = 'example.org';
+        const shortURI = 'hello13';
+        const link = new Link({
+            targetURL,
+            shortURI,
+            user: 'Charles',
+            expiresAt: new Date('2034'),
+            maxClicks: 10
+        });
+        const click = new Click();
+        link.clicks.push(click);
+        const linkData = await getLinkData(link, 'exhaustive');
+        expect(linkData.targetURL).toMatch(targetURL);
+        expect(linkData.shortURI).toMatch(shortURI);
+        expect(linkData.user).toBeFalsy();
+        expect(linkData.maxClicks).toBe(10);
+        expect(linkData.expiresAt).toEqual(new Date('2034'));
+        expect(linkData.clicks.length).toBe(1);
     });
 });
 
