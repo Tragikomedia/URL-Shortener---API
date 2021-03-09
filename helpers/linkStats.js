@@ -10,6 +10,7 @@ async function updateLinkStats(req, link) {
     } catch(error) {
         return {error};
     }
+    return {};
 }
 
 module.exports = { updateLinkStats };
