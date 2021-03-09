@@ -57,7 +57,7 @@ describe('GET /:id', () => {
     it('Send correct uri of a link that exceeded click limit, should receive error message', async () => {
         const url = 'www.example.pl';
         const options = {
-            maxClicks: 1
+            maxClicks: 2
         };
         const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
         const uri = postRes.body.uri;
@@ -171,7 +171,9 @@ describe('GET /user/links/:id', () => {
         const user = new User({externalId: 'cc32bn34', provider: 'Facebook', name: 'Nbody Important'});
         await user.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/links/buba691`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/buba691`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(res.body.error).toBeTruthy();
         expect(res.body.linkData).toBeUndefined();
     });
@@ -189,7 +191,9 @@ describe('DELETE /user/:id', () => {
             user: user.id,
         });
         await link.save();
-        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(res.body.success).toBeTruthy();
         const foundLink = await Link.findById(link.id);
         expect(foundLink).toBeFalsy();
@@ -201,6 +205,37 @@ describe('DELETE /user/:id', () => {
         const shortURI = 'ohp665';
         const res = await request.post(`/user/links/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         expect(res.body.success).toBeTruthy();
+    });
+});
+
+describe('Complex behavior', () => {
+    it('Given a user who posts, clicks, lists and deletes links, should not fail', async () => {
+        const user = new User({externalId: '07zglossie', provider: 'Google', name: 'Borewicz'});
+        await user.save();
+        const token = signJWT(user);
+        const linkUrl1 = 'coolwebsite.com';
+        const linkOptions1 = {
+            maxClicks: 2
+        };
+        const postRes = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .send({url: linkUrl1, options: linkOptions1});
+        const { uri } = postRes.body;
+        expect(uri).toMatch(/^[a-z0-9]{7}$/);
+        await request.get(`/${uri}`);
+        const getRes1 = await request.get(`/${uri}`);
+        expect(getRes1.headers.location).toMatch('https://coolwebsite.com');
+        const getRes2 = await request.get(`/${uri}`);
+        expect(getRes2.body.error).toBeTruthy();
+        const getList = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(getList.body.linksData.length).toBe(1);
+        expect(getList.body.linksData[0].shortURI).toMatch(uri);
+        const getLinkData = await request.get(`/user/links/${uri}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(getLinkData.body.linkData.shortURI).toMatch(uri);
+        expect(getLinkData.body.linkData.clicks.length).toBe(2);
+        const deleteRes = await request.post(`/user/links/${uri}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(deleteRes.body.success).toBeTruthy();
     });
 });
 
