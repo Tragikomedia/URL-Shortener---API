@@ -72,6 +72,13 @@ linkSchema.statics.findByUserId = async function(id) {
     return links;
 }
 
+linkSchema.statics.findInUserLinks = async function(user, uri) {
+    if (!(user && uri)) return {error: 'Not enough data to find the link'};
+    const link = await this.findOne({user: user.id, shortURI: uri});
+    if (!link) return {error: 'Such link does not exist'};
+    return {link};
+}
+
 // Creation
 const { getLinkParams } = require('../helpers/linkParams');
 linkSchema.statics.fromReq = async function(req) {
