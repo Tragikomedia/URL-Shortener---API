@@ -39,7 +39,7 @@ describe('POST /', () => {
 });
 
 describe('GET /:id', () => {
-    it('Send correct uri as params, get redirected to corresponding url', async () => {
+    it('Send correct uri as params, should get redirected to corresponding url', async () => {
         const url = 'www.wykop.pl';
         const postRes = await request.post('/').set('Content-Type', 'application/json').send({url});
         const uri = postRes.body?.uri;
@@ -47,6 +47,34 @@ describe('GET /:id', () => {
         const getRes = await request.get(`/${uri}`);
         const redirectedURL = getRes.headers?.location;
         expect(redirectedURL).toMatch('https://wykop.pl');
+    });
+    it('Send incorrect uri as params, should receive error message', async () => {
+        const res = await request.get('/bababu1');
+        expect(res.body.error).toBeTruthy();
+    });
+    it('Send correct uri of a link that exceeded click limit, should receive error message', async () => {
+        const url = 'www.example.pl';
+        const options = {
+            maxClicks: 1
+        };
+        const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
+        const uri = postRes.body.uri;
+        const res1 = await request.get(`/${uri}`);
+        expect(res1.headers.location).toMatch('https://example.pl');
+        const res2 = await request.get(`/${uri}`);
+        expect(res2.headers.location).toMatch('https://example.pl');
+        const res3 = await request.get(`/${uri}`);
+        expect(res3.body.error).toBeTruthy();
+    });
+    it('Send correct uri of a link that expired, should receive error message', async () => {
+        const url = 'www.example.be';
+        const options = {
+            expiresAt: Date('1999','07','13')
+        };
+        const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
+        const uri = postRes.body.uri;
+        const res = await request.get(`/${uri}`);
+        expect(res.body.error).toBeTruthy();
     });
 });
 
@@ -68,10 +96,14 @@ describe('GET /user/all', () => {
         expect(linksData.find(link => link.targetURL === url1)).toBeTruthy();
         expect(linksData.find(link => link.targetURL === url2)).toBeTruthy();
     });
-    it('Given a fake JWT, should get status Unauthorized', async () => {
+    it('Given a JWT pointing at a invalid user, should get status Unauthorized', async () => {
         const user = new User({externalId: 'aueufe', provider: 'Facebook', name: 'Nobody'});
         const token = signJWT(user);
         const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(res.status).toBe(401);
+    });
+    it('Given an invalid JWT, should get status Unauthorized', async () => {
+        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', 'Bearer ToJestSkandal');
         expect(res.status).toBe(401);
     });
     it('Given no JWT, should get status Unauthorized', async () => {
