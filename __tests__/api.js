@@ -177,6 +177,33 @@ describe('GET /user/:id', () => {
     });
 });
 
+describe('DELETE /user/:id', () => {
+    it('Given an existing uri and a user, should delete link and return success message', async () => {
+        const user = new User({externalId: 'cc32bee4', provider: 'Facebook', name: 'Marek Cukierberg'});
+        await user.save();
+        const token = signJWT(user);
+        const shortURI = 'oht665';
+        const link = new Link({
+            targetURL: 'vikop.ru',
+            shortURI,
+            user: user.id,
+        });
+        await link.save();
+        const res = await request.post(`/user/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(res.body.success).toBeTruthy();
+        const foundLink = await Link.findById(link.id);
+        expect(foundLink).toBeFalsy();
+    });
+    it('Given an non-existent uri and a user, should return success message', async () => {
+        const user = new User({externalId: 'cc32ber4', provider: 'Facebook', name: 'Jerry Buzzer'});
+        await user.save();
+        const token = signJWT(user);
+        const shortURI = 'ohp665';
+        const res = await request.post(`/user/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(res.body.success).toBeTruthy();
+    });
+});
+
 
 // All the tests that meddle with Db should be in one place
 // Otherwise, they might clean the Db while other tests are being processed
