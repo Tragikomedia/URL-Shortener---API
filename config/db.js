@@ -6,7 +6,7 @@ async function connect() {
     db.on('error', error => console.error(error));
     db.once('open', () => console.log('Connected to the DB...'));
     mongoose.set('useCreateIndex', true);
-    await mongoose.connect(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true });
+    await mongoose.connect(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 }
 
 async function disconnect() {
