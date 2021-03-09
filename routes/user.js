@@ -16,13 +16,22 @@ router.get('/all', authenticateUser, async (req, res) => {
 });
 
 // GET /user/:id
-// @desc Get a particular link posted by the user
+// @desc Get a particular link posted by user
 router.get('/:id', authenticateUser, async (req, res) => {
     const { id } = req.params;
     const { error, link } = await Link.findInUserLinks(req.user, id);
     if (error) return res.json({error});
     const linkData = await getLinkData(link, 'exhaustive');
     res.json({linkData});
+});
+
+// DELETE /user/:id
+// @desc Delete a particular link posted by user
+router.delete('/:id', authenticateUser, async (req, res) => {
+    const { id } = req.params;
+    const {error} = await Link.deleteUserLink(req.user, id);
+    if (error) return res.send({error});
+    res.send({success: 'Link deleted successfully'});
 });
 
 module.exports = router;
