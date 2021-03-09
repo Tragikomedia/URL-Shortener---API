@@ -22,7 +22,7 @@ const getLinkData = async (link, mode = 'brief') => {
     return data;
 };
 
-// Without Promise.all parseLinks and other async maps return an array of promises
+// Without Promise.all this and other async maps return an array of promises
 const extractData = async links => await Promise.all(links.map(getLinkData));
 
 module.exports = { extractData, getLinkData };
