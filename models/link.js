@@ -88,4 +88,15 @@ linkSchema.statics.fromReq = async function(req) {
     return {link};
 }
 
+// Deletion
+linkSchema.statics.deleteUserLink = async function(user, uri) {
+    if (!(user && uri)) return {error: 'Not enough data to find the link'};
+    try {
+        await this.findOneAndRemove({user: user.id, shortURI: uri});
+    } catch (error) {
+        return {error};
+    }
+    return {};
+}
+
 module.exports = model('Link', linkSchema);
