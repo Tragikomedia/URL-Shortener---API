@@ -14,7 +14,6 @@ const clickSchema = new Schema({
 });
 
 // Static
-const Click = require('../models/click');
 const requestIp = require('request-ip');
 
 clickSchema.statics.fromReq = function(req) {
