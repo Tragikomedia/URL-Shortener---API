@@ -35,7 +35,7 @@ const linkSchema = new Schema({
 });
 
 // Expiration
-const checkLinkExpiration = link => (link.maxClicks && link.maxClicks < link.clicks.length) || (link.expiresAt && link.expiresAt < Date.now());
+const checkLinkExpiration = link => (link.maxClicks && link.maxClicks <= link.clicks.length) || (link.expiresAt && link.expiresAt < Date.now());
 
 linkSchema.methods.isExpired = function() {
     if (!this.expired) this.expired = checkLinkExpiration(this);
