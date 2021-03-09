@@ -80,7 +80,7 @@ describe('GET /:id', () => {
     });
 });
 
-describe('GET /user/all', () => {
+describe('GET /user/links/all', () => {
     it('Given a proper JWT of a valid user, should list all links of the user', async () => {
         // Creating a user is necessary due to authentication
         const user = new User({externalId: 'aabb546', provider: 'Facebook', name: 'Somebody'});
@@ -92,7 +92,7 @@ describe('GET /user/all', () => {
         await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url1});
         await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url2});
         // Get a list of links
-        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         const { linksData } = res.body;
         expect(linksData.length).toBe(2);
         expect(linksData.find(link => link.targetURL === url1)).toBeTruthy();
@@ -101,20 +101,20 @@ describe('GET /user/all', () => {
     it('Given a JWT pointing at a invalid user, should get status Unauthorized', async () => {
         const user = new User({externalId: 'aueufe', provider: 'Facebook', name: 'Nobody'});
         const token = signJWT(user);
-        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         expect(res.status).toBe(401);
     });
     it('Given an invalid JWT, should get status Unauthorized', async () => {
-        const res = await request.get('/user/all').set('Content-Type', 'application/json').set('Authorization', 'Bearer ToJestSkandal');
+        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', 'Bearer ToJestSkandal');
         expect(res.status).toBe(401);
     });
     it('Given no JWT, should get status Unauthorized', async () => {
-        const res = await request.get('/user/all').set('Content-Type', 'application/json');
+        const res = await request.get('/user/links/all').set('Content-Type', 'application/json');
         expect(res.status).toBe(401);
     });
 });
 
-describe('GET /user/:id', () => {
+describe('GET /user/links/:id', () => {
     it('Given a URI of basic fresh link, should return brief linkData', async () => {
         const user = new User({externalId: 'cccbbn34', provider: 'Facebook', name: 'Nobody Important'});
         await user.save();
@@ -127,7 +127,7 @@ describe('GET /user/:id', () => {
         });
         await link.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         const {linkData} = res.body;
         expect(linkData).toBeTruthy();
         expect(linkData.targetURL).toMatch(targetURL);
@@ -154,7 +154,7 @@ describe('GET /user/:id', () => {
         link.clicks.push(click2.id);
         await link.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         const {linkData} = res.body;
         expect(linkData).toBeTruthy();
         expect(linkData.targetURL).toMatch(targetURL);
@@ -164,14 +164,14 @@ describe('GET /user/:id', () => {
         expect(linkData.maxClicks).toBe(15);
     });
     it('Given a request made by an unauthorized user, should receive status Unauthorized', async () => {
-        const res = await request.get('/user/aabbcce').set('Content-Type', 'application/json');
+        const res = await request.get('/user/links/aabbcce').set('Content-Type', 'application/json');
         expect(res.status).toBe(401);
     });
     it('Given a request pointing at uri of non-existent link, should receive error', async () => {
         const user = new User({externalId: 'cc32bn34', provider: 'Facebook', name: 'Nbody Important'});
         await user.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/buba691`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/buba691`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         expect(res.body.error).toBeTruthy();
         expect(res.body.linkData).toBeUndefined();
     });
@@ -189,7 +189,7 @@ describe('DELETE /user/:id', () => {
             user: user.id,
         });
         await link.save();
-        const res = await request.post(`/user/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         expect(res.body.success).toBeTruthy();
         const foundLink = await Link.findById(link.id);
         expect(foundLink).toBeFalsy();
@@ -199,7 +199,7 @@ describe('DELETE /user/:id', () => {
         await user.save();
         const token = signJWT(user);
         const shortURI = 'ohp665';
-        const res = await request.post(`/user/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
         expect(res.body.success).toBeTruthy();
     });
 });

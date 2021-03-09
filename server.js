@@ -18,11 +18,11 @@ app.use(passport.initialize());
 app.use(methodOverride('_method'));
 
 // Routes
-const apiRouter = require('./routes/api');
+const apiRouter = require('./routes');
 const authRouter = require('./routes/auth');
 const userRouter = require('./routes/user');
 app.use('/auth', authRouter);
-app.use('/user', userRouter);
+app.use('/user/links', userRouter);
 app.use('/', apiRouter);
 
 module.exports = app;
