@@ -25,7 +25,7 @@ router.post('/',attemptAuthetication, async (req, res) => {
 router.get('/:id', async (req, res) => {
     const { id } = req.params;
     const { error, link } = await Link.findByUri(id);
-    if (error) return res.json({error});
+    if (error) return res.render('error.html', {error});
     const url = link.targetURL;
     res.redirect(`https://${url}`);
     // Useful only for stats or click-related expiration

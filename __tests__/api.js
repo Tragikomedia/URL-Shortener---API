@@ -27,13 +27,17 @@ afterAll(async done => {
 describe('POST /', () => {
     it('Send incorrect url, receive error', async done => {
         const badUrl = "ugabuga";
-        const res = await request.post('/').set('Content-Type', 'application/json').send({url: badUrl});
+        const res = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .send({url: badUrl});
         expect(res.body?.error).toBe("Invalid URL");
         done();
     });
     it('Send proper url, receive message', async done => {
         const properUrl = "ugabuga.com";
-        const res = await request.post('/').set('Content-Type', 'application/json').send({url: properUrl});
+        const res = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .send({url: properUrl});
         expect(res.body?.uri).toBeTruthy();
         expect(res.body?.uri).toMatch(/^[a-z0-9]{7}$/);
         done();
@@ -43,7 +47,9 @@ describe('POST /', () => {
 describe('GET /:id', () => {
     it('Send correct uri as params, should get redirected to corresponding url', async () => {
         const url = 'www.wykop.pl';
-        const postRes = await request.post('/').set('Content-Type', 'application/json').send({url});
+        const postRes = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .send({url});
         const uri = postRes.body?.uri;
         expect(uri).toMatch(/^[a-z0-9]{7}$/);
         const getRes = await request.get(`/${uri}`);
@@ -52,31 +58,38 @@ describe('GET /:id', () => {
     });
     it('Send incorrect uri as params, should receive error message', async () => {
         const res = await request.get('/bababu1');
-        expect(res.body.error).toBeTruthy();
+        expect(res.text).toBeTruthy();
+        expect(res.text.startsWith('<!DOCTYPE')).toBeTruthy();
     });
     it('Send correct uri of a link that exceeded click limit, should receive error message', async () => {
         const url = 'www.example.pl';
         const options = {
             maxClicks: 2
         };
-        const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
+        const postRes = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .send({url, options});
         const uri = postRes.body.uri;
         const res1 = await request.get(`/${uri}`);
         expect(res1.headers.location).toMatch('https://example.pl');
         const res2 = await request.get(`/${uri}`);
         expect(res2.headers.location).toMatch('https://example.pl');
         const res3 = await request.get(`/${uri}`);
-        expect(res3.body.error).toBeTruthy();
+        expect(res3.text).toBeTruthy();
+        expect(res3.text.startsWith('<!DOCTYPE')).toBeTruthy();
     });
     it('Send correct uri of a link that expired, should receive error message', async () => {
         const url = 'www.example.be';
         const options = {
             expiresAt: new Date('1999','07','13')
         };
-        const postRes = await request.post('/').set('Content-Type', 'application/json').send({url, options});
+        const postRes = await request.post('/')
+            .set('Content-Type', 'application/json')
+            .send({url, options});
         const uri = postRes.body.uri;
         const res = await request.get(`/${uri}`);
-        expect(res.body.error).toBeTruthy();
+        expect(res.text).toBeTruthy();
+        expect(res.text.startsWith('<!DOCTYPE')).toBeTruthy();
     });
 });
 
@@ -89,10 +102,18 @@ describe('GET /user/links/all', () => {
         // Post links
         const url1 = 'wykop.pl';
         const url2 = 'facebook.com';
-        await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url1});
-        await request.post('/').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`).send({url: url2});
+        await request.post('/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .send({url: url1});
+        await request.post('/')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`)
+            .send({url: url2});
         // Get a list of links
-        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get('/user/links/all')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         const { linksData } = res.body;
         expect(linksData.length).toBe(2);
         expect(linksData.find(link => link.targetURL === url1)).toBeTruthy();
@@ -101,15 +122,20 @@ describe('GET /user/links/all', () => {
     it('Given a JWT pointing at a invalid user, should get status Unauthorized', async () => {
         const user = new User({externalId: 'aueufe', provider: 'Facebook', name: 'Nobody'});
         const token = signJWT(user);
-        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get('/user/links/all')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(res.status).toBe(401);
     });
     it('Given an invalid JWT, should get status Unauthorized', async () => {
-        const res = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', 'Bearer ToJestSkandal');
+        const res = await request.get('/user/links/all')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', 'Bearer ToJestSkandal');
         expect(res.status).toBe(401);
     });
     it('Given no JWT, should get status Unauthorized', async () => {
-        const res = await request.get('/user/links/all').set('Content-Type', 'application/json');
+        const res = await request.get('/user/links/all')
+            .set('Content-Type', 'application/json');
         expect(res.status).toBe(401);
     });
 });
@@ -127,7 +153,9 @@ describe('GET /user/links/:id', () => {
         });
         await link.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/links/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/${shortURI}`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         const {linkData} = res.body;
         expect(linkData).toBeTruthy();
         expect(linkData.targetURL).toMatch(targetURL);
@@ -154,7 +182,9 @@ describe('GET /user/links/:id', () => {
         link.clicks.push(click2.id);
         await link.save();
         const token = signJWT(user);
-        const res = await request.get(`/user/links/${shortURI}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.get(`/user/links/${shortURI}`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         const {linkData} = res.body;
         expect(linkData).toBeTruthy();
         expect(linkData.targetURL).toMatch(targetURL);
@@ -164,7 +194,8 @@ describe('GET /user/links/:id', () => {
         expect(linkData.maxClicks).toBe(15);
     });
     it('Given a request made by an unauthorized user, should receive status Unauthorized', async () => {
-        const res = await request.get('/user/links/aabbcce').set('Content-Type', 'application/json');
+        const res = await request.get('/user/links/aabbcce')
+            .set('Content-Type', 'application/json');
         expect(res.status).toBe(401);
     });
     it('Given a request pointing at uri of non-existent link, should receive error', async () => {
@@ -203,7 +234,9 @@ describe('DELETE /user/:id', () => {
         await user.save();
         const token = signJWT(user);
         const shortURI = 'ohp665';
-        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const res = await request.post(`/user/links/${shortURI}?_method=DELETE`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(res.body.success).toBeTruthy();
     });
 });
@@ -227,14 +260,21 @@ describe('Complex behavior', () => {
         const getRes1 = await request.get(`/${uri}`);
         expect(getRes1.headers.location).toMatch('https://coolwebsite.com');
         const getRes2 = await request.get(`/${uri}`);
-        expect(getRes2.body.error).toBeTruthy();
-        const getList = await request.get('/user/links/all').set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        expect(getRes2.text).toBeTruthy();
+        expect(getRes2.text.startsWith('<!DOCTYPE')).toBeTruthy();
+        const getList = await request.get('/user/links/all')
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(getList.body.linksData.length).toBe(1);
         expect(getList.body.linksData[0].shortURI).toMatch(uri);
-        const getLinkData = await request.get(`/user/links/${uri}`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const getLinkData = await request.get(`/user/links/${uri}`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(getLinkData.body.linkData.shortURI).toMatch(uri);
         expect(getLinkData.body.linkData.clicks.length).toBe(2);
-        const deleteRes = await request.post(`/user/links/${uri}?_method=DELETE`).set('Content-Type', 'application/json').set('Authorization', `Bearer ${token}`);
+        const deleteRes = await request.post(`/user/links/${uri}?_method=DELETE`)
+            .set('Content-Type', 'application/json')
+            .set('Authorization', `Bearer ${token}`);
         expect(deleteRes.body.success).toBeTruthy();
     });
 });
