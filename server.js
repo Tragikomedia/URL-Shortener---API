@@ -25,4 +25,7 @@ app.use('/auth', authRouter);
 app.use('/user/links', userRouter);
 app.use('/', apiRouter);
 
+const { errorHandler } = require('./middlewares/errorHandling');
+app.use(errorHandler);
+
 module.exports = app;
