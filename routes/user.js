@@ -3,7 +3,7 @@ const Link = require('../models/link');
 const { authenticateUser } = require('../middlewares/auth');
 const { extractData, getLinkData } = require('../helpers/linkData');
 
-// GET /user/all
+// GET /user/links/all
 // @desc Get all links posted by the user
 router.get('/all', authenticateUser, async (req, res) => {
     const links = await Link.findByUserId(req.user?.id);
@@ -15,7 +15,7 @@ router.get('/all', authenticateUser, async (req, res) => {
     res.json(message);
 });
 
-// GET /user/:id
+// GET /user/links/:id
 // @desc Get a particular link posted by user
 router.get('/:id', authenticateUser, async (req, res) => {
     const { id } = req.params;
@@ -25,7 +25,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
     res.json({linkData});
 });
 
-// DELETE /user/:id
+// DELETE /user/links/:id
 // @desc Delete a particular link posted by user
 router.delete('/:id', authenticateUser, async (req, res) => {
     const { id } = req.params;

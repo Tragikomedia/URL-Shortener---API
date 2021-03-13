@@ -25,6 +25,7 @@ app.use('/auth', authRouter);
 app.use('/user/links', userRouter);
 app.use('/', apiRouter);
 
+//Last resort error handling
 const { errorHandler } = require('./middlewares/errorHandling');
 app.use(errorHandler);
 
