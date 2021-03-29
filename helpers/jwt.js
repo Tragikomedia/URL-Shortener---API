@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const env = require('../config/env');
 
 const signJWT = (user) =>
-  jwt.sign({ id: user.id, name: user.name }, process.env.JWT_SECRET, {
+  jwt.sign({ id: user.id, name: user.name }, env.JWT_SECRET, {
     expiresIn: '1h',
   });
-const verifyJWT = (token) => jwt.verify(token, process.env.JWT_SECRET);
+const verifyJWT = (token) => jwt.verify(token, env.JWT_SECRET);
 const passTokenToClient = (req, res) => {
   const token = signJWT(req.user);
   // Render a view where script passes the token to client via postMessage
