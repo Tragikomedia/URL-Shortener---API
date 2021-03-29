@@ -243,7 +243,7 @@ describe('GET /user/links/:id', () => {
 });
 
 describe('DELETE /user/:id', () => {
-  it('Given an existing uri and a user, should delete link and return success message', async () => {
+  it('Given an existing uri and a user, should delete link and return 204', async () => {
     const user = new User({
       externalId: 'cc32bee4',
       provider: 'Facebook',
@@ -262,11 +262,11 @@ describe('DELETE /user/:id', () => {
       .post(`/user/links/${shortURI}?_method=DELETE`)
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
-    expect(res.body.success).toBeTruthy();
+    expect(res.status).toBe(204);
     const foundLink = await Link.findById(link.id);
     expect(foundLink).toBeFalsy();
   });
-  it('Given an non-existent uri and a user, should return success message', async () => {
+  it('Given an non-existent uri and a user, should return 204', async () => {
     const user = new User({
       externalId: 'cc32ber4',
       provider: 'Facebook',
@@ -279,7 +279,7 @@ describe('DELETE /user/:id', () => {
       .post(`/user/links/${shortURI}?_method=DELETE`)
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
-    expect(res.body.success).toBeTruthy();
+    expect(res.status).toBe(204);
   });
 });
 
@@ -325,12 +325,9 @@ describe('Complex behavior', () => {
       .post(`/user/links/${uri}?_method=DELETE`)
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
-    expect(deleteRes.body.success).toBeTruthy();
+    expect(deleteRes.status).toBe(204);
   });
 });
-
-// All the tests that meddle with Db should be in one place
-// Otherwise, they might clean the Db while other tests are being processed
 
 // Remove all the elements from test database
 async function cleanUp() {
