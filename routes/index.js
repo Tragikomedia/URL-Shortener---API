@@ -1,5 +1,5 @@
 const router = require('express').Router();
-
+const logger = require('../helpers/logger');
 const { validURL } = require('../helpers/validation');
 const { attemptAuthetication } = require('../middlewares/auth');
 const { updateLinkStats } = require('../helpers/linkStats');
@@ -9,15 +9,15 @@ const Link = require('../models/link');
 // @desc Post a link to be shortened, receive URI
 router.post('/', attemptAuthetication, async (req, res) => {
   const { url } = req.body;
-  if (!validURL(url)) return res.json({ error: 'Invalid URL' });
+  if (!validURL(url)) return res.status(400).json({ error: 'Invalid URL' });
   const { error, link } = await Link.fromReq(req);
-  if (error) return res.json({ error });
+  if (error) return res.status(500).json({ error });
   try {
     await link.save();
   } catch (error) {
-    return res.json({ error: `Internal server error: ${error}` });
+    return res.status(500).json({ error: `Internal server error: ${error}` });
   }
-  res.json({ uri: link.shortURI });
+  res.status(201).json({ uri: link.shortURI });
 });
 
 // GET /:id
@@ -31,7 +31,7 @@ router.get('/:id', async (req, res) => {
   // Useful only for stats or click-related expiration
   if (link.user || link.maxClicks) {
     const { error } = await updateLinkStats(req, link);
-    if (error) console.error(`Could not save updated data: ${error}`);
+    if (error) logger.error(`Could not save updated data: ${error}`);
   }
 });
 

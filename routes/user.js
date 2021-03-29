@@ -19,19 +19,19 @@ router.get('/all', authenticateUser, async (req, res) => {
 // @desc Get a particular link posted by user
 router.get('/:id', authenticateUser, async (req, res) => {
   const { id } = req.params;
-  const { error, link } = await Link.findInUserLinks(req.user, id);
-  if (error) return res.json({ error });
+  const { error, link, status } = await Link.findInUserLinks(req.user, id);
+  if (error) return res.status(status).json({ error });
   const linkData = await getLinkData(link, 'exhaustive');
-  res.json({ linkData });
+  res.status(200).json({ linkData });
 });
 
 // DELETE /user/links/:id
 // @desc Delete a particular link posted by user
 router.delete('/:id', authenticateUser, async (req, res) => {
   const { id } = req.params;
-  const { error } = await Link.deleteUserLink(req.user, id);
-  if (error) return res.send({ error });
-  res.send({ success: 'Link deleted successfully' });
+  const { error, status } = await Link.deleteUserLink(req.user, id);
+  if (error) return res.status(status).json({ error });
+  res.status(204).end();
 });
 
 module.exports = router;
