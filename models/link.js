@@ -75,9 +75,9 @@ linkSchema.statics.findByUserId = async function (id) {
 };
 
 linkSchema.statics.findInUserLinks = async function (user, uri) {
-  if (!(user && uri)) return { error: 'Not enough data to find the link' };
+  if (!(user && uri)) return { error: 'Not enough data to find the link', status: 400 };
   const link = await this.findOne({ user: user.id, shortURI: uri });
-  if (!link) return { error: 'Such link does not exist' };
+  if (!link) return { error: 'Such link does not exist', status: 404 };
   return { link };
 };
 
@@ -92,11 +92,11 @@ linkSchema.statics.fromReq = async function (req) {
 
 // Deletion
 linkSchema.statics.deleteUserLink = async function (user, uri) {
-  if (!(user && uri)) return { error: 'Not enough data to find the link' };
+  if (!(user && uri)) return { error: 'Not enough data to find the link', status: 400 };
   try {
     await this.findOneAndRemove({ user: user.id, shortURI: uri });
   } catch (error) {
-    return { error };
+    return { error, status: 500 };
   }
   return {};
 };
