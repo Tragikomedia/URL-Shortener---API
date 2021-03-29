@@ -1,10 +1,12 @@
 const mongoose = require('mongoose');
+const env = require('./env');
+const logger = require('../helpers/logger');
 
 async function connect() {
-    let mongoURL = process.env.NODE_ENV !== 'test' ? process.env.DATABASE_URL : "mongodb://localhost/test1";
+    let mongoURL = env.DATABASE_URL;
     const db = mongoose.connection;
-    db.on('error', error => console.error(error));
-    db.once('open', () => console.log('Connected to the DB...'));
+    db.on('error', error => logger.error(error));
+    db.once('open', () => logger.info('Connected to the DB...'));
     mongoose.set('useCreateIndex', true);
     await mongoose.connect(mongoURL, { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false });
 }
