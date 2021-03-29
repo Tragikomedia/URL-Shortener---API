@@ -3,16 +3,21 @@ const env = require('./env');
 const logger = require('../helpers/logger');
 
 async function connect() {
-  let mongoURL = env.DATABASE_URL;
-  const db = mongoose.connection;
-  db.on('error', (error) => logger.error(error));
-  db.once('open', () => logger.info('Connected to the DB...'));
-  mongoose.set('useCreateIndex', true);
-  await mongoose.connect(mongoURL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    useFindAndModify: false,
-  });
+  try {
+    let mongoURL = env.DATABASE_URL;
+    await mongoose.connect(
+      mongoURL,
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+        useFindAndModify: false,
+        useCreateIndex: true,
+      },
+      () => logger.info('Connected to the DB...')
+    );
+  } catch (error) {
+    logger.error(error);
+  }
 }
 
 async function disconnect() {
