@@ -8,6 +8,7 @@ const User = require('../models/user');
 const Link = require('../models/link');
 const Click = require('../models/click');
 const { signJWT } = require('../helpers/jwt');
+const uriMatcher = /^[a-zA-Z0-9]{7}$/;
 
 beforeAll(async (done) => {
   await db.connect();
@@ -38,7 +39,7 @@ describe('POST /', () => {
       .set('Content-Type', 'application/json')
       .send({ url: properUrl });
     expect(res.body?.uri).toBeTruthy();
-    expect(res.body?.uri).toMatch(/^[a-z0-9]{7}$/);
+    expect(res.body?.uri).toMatch(uriMatcher);
     done();
   });
 });
@@ -51,7 +52,7 @@ describe('GET /:id', () => {
       .set('Content-Type', 'application/json')
       .send({ url });
     const uri = postRes.body?.uri;
-    expect(uri).toMatch(/^[a-z0-9]{7}$/);
+    expect(uri).toMatch(uriMatcher);
     const getRes = await request.get(`/${uri}`);
     const redirectedURL = getRes.headers?.location;
     expect(redirectedURL).toMatch('https://wykop.pl');
@@ -302,7 +303,7 @@ describe('Complex behavior', () => {
       .set('Authorization', `Bearer ${token}`)
       .send({ url: linkUrl1, options: linkOptions1 });
     const { uri } = postRes.body;
-    expect(uri).toMatch(/^[a-z0-9]{7}$/);
+    expect(uri).toMatch(uriMatcher);
     await request.get(`/${uri}`);
     const getRes1 = await request.get(`/${uri}`);
     expect(getRes1.headers.location).toMatch('https://coolwebsite.com');

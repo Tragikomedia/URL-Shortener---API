@@ -20,6 +20,6 @@ describe('Unique URI generation', () => {
     const storage = await UriStorage.findOne();
     const { error, shortURI } = await generateUniqueURI(storage);
     expect(error).toBeFalsy();
-    expect(shortURI).toMatch(/^[a-z0-9]{7}$/);
+    expect(shortURI).toMatch(/^[a-zA-Z0-9]{7}$/);
   });
 });

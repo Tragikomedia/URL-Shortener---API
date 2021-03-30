@@ -1,6 +1,6 @@
 const UriStorage = require('../models/uriStorage');
 
-const chars = '1234567890qwertyuiopasdfghjklzxcvbnm';
+const chars = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM';
 const charsLen = chars.length;
 const uriLength = 7;
 
