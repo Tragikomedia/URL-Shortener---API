@@ -329,6 +329,9 @@ describe('Complex behavior', () => {
   });
 });
 
+// All the tests that meddle with Db should be in one place
+// Otherwise, they might clean the Db while other tests are being processed
+
 // Remove all the elements from test database
 async function cleanUp() {
   const Link = require('../models/link');
