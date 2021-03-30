@@ -7,6 +7,10 @@ app.engine('html', mustacheExpress());
 app.set('view engine', 'mustache');
 app.set('views', __dirname + '/views');
 
+//Api-docs
+const swagger = require('./config/swagger');
+app.use('/api-docs', swagger.serve, swagger.setup);
+
 // Middlewares
 const cors = require('cors');
 const passport = require('./config/passport');
