@@ -96,7 +96,7 @@ describe('GET /:id', () => {
   });
 });
 
-describe('GET /user/links/all', () => {
+describe('GET /user/links/', () => {
   it('Given a proper JWT of a valid user, should list all links of the user', async () => {
     // Creating a user is necessary due to authentication
     const user = new User({
@@ -121,7 +121,7 @@ describe('GET /user/links/all', () => {
       .send({ url: url2 });
     // Get a list of links
     const res = await request
-      .get('/user/links/all')
+      .get('/user/links/')
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
     const { linksData } = res.body;
@@ -137,21 +137,21 @@ describe('GET /user/links/all', () => {
     });
     const token = signJWT(user);
     const res = await request
-      .get('/user/links/all')
+      .get('/user/links/')
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(401);
   });
   it('Given an invalid JWT, should get status Unauthorized', async () => {
     const res = await request
-      .get('/user/links/all')
+      .get('/user/links/')
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ToJestSkandal');
     expect(res.status).toBe(401);
   });
   it('Given no JWT, should get status Unauthorized', async () => {
     const res = await request
-      .get('/user/links/all')
+      .get('/user/links/')
       .set('Content-Type', 'application/json');
     expect(res.status).toBe(401);
   });
@@ -311,7 +311,7 @@ describe('Complex behavior', () => {
     expect(getRes2.text).toBeTruthy();
     expect(getRes2.text.startsWith('<!DOCTYPE')).toBeTruthy();
     const getList = await request
-      .get('/user/links/all')
+      .get('/user/links/')
       .set('Content-Type', 'application/json')
       .set('Authorization', `Bearer ${token}`);
     expect(getList.body.linksData.length).toBe(1);
