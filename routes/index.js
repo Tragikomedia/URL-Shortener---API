@@ -63,7 +63,7 @@ const Link = require('../models/link');
  * /:
  *  post:
  *    tags:
- *      - index
+ *      - Public API
  *    summary: Post link that you want to shorten
  *    description: Authorization is not obligatory, but adding a valid JWT makes links associated with the user.
  *    requestBody:
@@ -114,7 +114,7 @@ router.post('/', attemptAuthetication, async (req, res) => {
  * /{id}:
  *   get:
  *     tags:
- *      - index
+ *      - Public API
  *     summary: Use uri id you obtained from POST / to get redirected to your desired destination
  *     parameters:
  *       - in: path
