@@ -14,6 +14,7 @@ const getLinkData = async (link, mode = 'brief') => {
   const data = {};
   data.targetURL = link.targetURL;
   data.shortURI = link.shortURI;
+  data.id = link._id;
   if (mode === 'exhaustive') {
     data.expiresAt = link.expiresAt;
     data.maxClicks = link.maxClicks;
