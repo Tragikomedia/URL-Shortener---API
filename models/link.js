@@ -40,18 +40,16 @@ const checkLinkExpiration = (link) =>
   (link.expiresAt && link.expiresAt < Date.now());
 
 linkSchema.methods.isExpired = function () {
-  if (!this.expired) this.expired = checkLinkExpiration(this);
-  return this.expired;
+  return checkLinkExpiration(this);
 };
 
 linkSchema.methods.expire = async function () {
-  if (!this.expired) {
-    this.expired = true;
-    try {
-      await this.save();
-    } catch (error) {
-      return { error };
-    }
+  this.expired = true;
+  try {
+    await this.save();
+    return {};
+  } catch (error) {
+    return { error };
   }
 };
 
@@ -61,9 +59,10 @@ linkSchema.statics.findByUri = async function (uri) {
   if (!validInternalURI(uri)) return { error: 'Invalid link ID' };
   const link = await this.findOne({ shortURI: uri });
   if (!link) return { error: 'Link does not exist' };
+  if (link.expired) return { error: 'Expired link' };
   if (link.isExpired()) {
-    await link.expire();
-    return { error: 'Expired link' };
+    const { error} = await link.expire();
+    return { error: error ?? 'Expired link' };
   }
   return { link };
 };
@@ -75,7 +74,8 @@ linkSchema.statics.findByUserId = async function (id) {
 };
 
 linkSchema.statics.findInUserLinks = async function (user, uri) {
-  if (!(user && uri)) return { error: 'Not enough data to find the link', status: 400 };
+  if (!(user && uri))
+    return { error: 'Not enough data to find the link', status: 400 };
   const link = await this.findOne({ user: user.id, shortURI: uri });
   if (!link) return { error: 'Such link does not exist', status: 404 };
   return { link };
@@ -92,7 +92,8 @@ linkSchema.statics.fromReq = async function (req) {
 
 // Deletion
 linkSchema.statics.deleteUserLink = async function (user, uri) {
-  if (!(user && uri)) return { error: 'Not enough data to find the link', status: 400 };
+  if (!(user && uri))
+    return { error: 'Not enough data to find the link', status: 400 };
   try {
     await this.findOneAndRemove({ user: user.id, shortURI: uri });
   } catch (error) {
