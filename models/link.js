@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const { getLinkParams, getUpdateParams } = require('../helpers/linkParams');
 
 const linkSchema = new Schema({
   targetURL: {
@@ -61,7 +62,7 @@ linkSchema.statics.findByUri = async function (uri) {
   if (!link) return { error: 'Link does not exist' };
   if (link.expired) return { error: 'Expired link' };
   if (link.isExpired()) {
-    const { error} = await link.expire();
+    const { error } = await link.expire();
     return { error: error ?? 'Expired link' };
   }
   return { link };
@@ -76,18 +77,37 @@ linkSchema.statics.findByUserId = async function (id) {
 linkSchema.statics.findInUserLinks = async function (user, uri) {
   if (!(user && uri))
     return { error: 'Not enough data to find the link', status: 400 };
-  const link = await this.findOne({ user: user.id, shortURI: uri }).populate('clicks', {ip: 1, time: 1, referer: 1});
+  const link = await this.findOne({
+    user: user.id,
+    shortURI: uri,
+  }).populate('clicks', { ip: 1, time: 1, referer: 1 });
   if (!link) return { error: 'Such link does not exist', status: 404 };
   return { link };
 };
 
 // Creation
-const { getLinkParams } = require('../helpers/linkParams');
 linkSchema.statics.fromReq = async function (req) {
   const { error, params } = await getLinkParams(req);
   if (error) return { error };
   const link = new this(params);
   return { link };
+};
+
+// Update
+linkSchema.statics.updateByReq = async function (req) {
+  const { id } = req.params;
+  const { user } = req;
+  const { error, updateObj } = getUpdateParams(req);
+  if (error) return { error, status: 400 };
+  const link = await this.findOne({ user: user.id, shortURI: id });
+  if (!link) return {error: 'Could not find link', status: 404};
+  try {
+    await link.updateOne(updateObj);
+    await link.save();
+  } catch (error) {
+    return { error, status: 500 };
+  }
+  return {};
 };
 
 // Deletion
