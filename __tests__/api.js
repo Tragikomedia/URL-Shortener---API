@@ -6,19 +6,22 @@ const uriStorage = require('../config/uriStorage');
 
 const User = require('../models/user');
 const Link = require('../models/link');
-const Click = require('../models/click');
 const { signJWT } = require('../helpers/jwt');
 const uriMatcher = /^[a-zA-Z0-9]{7}$/;
 
 beforeAll(async (done) => {
   await db.connect();
-  await uriStorage.initialize();
   done();
 });
 
 afterAll(async (done) => {
-  await cleanUp();
   await db.disconnect();
+  done();
+});
+
+beforeEach(async (done) => {
+  await db.clean();
+  await uriStorage.initialize();
   done();
 });
 
@@ -202,11 +205,13 @@ describe('GET /user/links/:id', () => {
       expiresAt: new Date('2040'),
       maxClicks: 15,
     });
-    const click1 = new Click();
-    const click2 = new Click();
-    link.clicks.push(click1.id);
-    link.clicks.push(click2.id);
     await link.save();
+    await request.get(`/${shortURI}`);
+    await request.get(`/${shortURI}`);
+    // const click1 = new Click();
+    // const click2 = new Click();
+    // link.clicks.push(click1.id);
+    // link.clicks.push(click2.id);
     const token = signJWT(user);
     const res = await request
       .get(`/user/links/${shortURI}`)
@@ -329,15 +334,3 @@ describe('Complex behavior', () => {
     expect(deleteRes.status).toBe(204);
   });
 });
-
-// All the tests that meddle with Db should be in one place
-// Otherwise, they might clean the Db while other tests are being processed
-
-// Remove all the elements from test database
-async function cleanUp() {
-  const Link = require('../models/link');
-  const UriStorage = require('../models/uriStorage');
-  await Link.deleteMany();
-  await UriStorage.deleteMany();
-  await User.deleteMany();
-}

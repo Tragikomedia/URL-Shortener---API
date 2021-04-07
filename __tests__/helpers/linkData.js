@@ -14,6 +14,10 @@ afterAll((done) => {
   done();
 });
 
+beforeEach(async () => {
+  await db.clean();
+});
+
 describe('getLinkData', () => {
   it('Given a link in default mode, should return brief data', async () => {
     const targetURL = 'example.org';
@@ -24,7 +28,7 @@ describe('getLinkData', () => {
       user: 'Charles',
       maxClicks: 10,
     });
-    const linkData = await getLinkData(link);
+    const linkData = getLinkData(link);
     expect(linkData.targetURL).toMatch(targetURL);
     expect(linkData.shortURI).toMatch(shortURI);
     expect(linkData.user).toBeFalsy();
@@ -41,8 +45,8 @@ describe('getLinkData', () => {
       maxClicks: 10,
     });
     const click = new Click();
-    link.clicks.push(click);
-    const linkData = await getLinkData(link, 'exhaustive');
+    link.clicks.push(click.id);
+    const linkData = getLinkData(link, 'exhaustive');
     expect(linkData.targetURL).toMatch(targetURL);
     expect(linkData.shortURI).toMatch(shortURI);
     expect(linkData.user).toBeFalsy();

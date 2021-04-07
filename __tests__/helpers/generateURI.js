@@ -6,12 +6,17 @@ const UriStorage = require('../../models/uriStorage');
 
 beforeAll(async (done) => {
   await db.connect();
-  await uriStorage.initialize();
   done();
 });
 
 afterAll((done) => {
   db.disconnect();
+  done();
+});
+
+beforeEach(async (done) => {
+  await db.clean();
+  await uriStorage.initialize();
   done();
 });
 
