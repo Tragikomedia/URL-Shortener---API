@@ -154,7 +154,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
   const { id } = req.params;
   const { error, link, status } = await Link.findInUserLinks(req.user, id);
   if (error) return res.status(status).json({ error });
-  const linkData = await getLinkData(link, 'exhaustive');
+  const linkData = getLinkData(link, 'exhaustive');
   res.status(200).json({ linkData });
 });
 

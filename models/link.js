@@ -76,7 +76,7 @@ linkSchema.statics.findByUserId = async function (id) {
 linkSchema.statics.findInUserLinks = async function (user, uri) {
   if (!(user && uri))
     return { error: 'Not enough data to find the link', status: 400 };
-  const link = await this.findOne({ user: user.id, shortURI: uri });
+  const link = await this.findOne({ user: user.id, shortURI: uri }).populate('clicks', {ip: 1, time: 1, referer: 1});
   if (!link) return { error: 'Such link does not exist', status: 404 };
   return { link };
 };
