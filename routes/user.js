@@ -158,6 +158,12 @@ router.get('/:id', authenticateUser, async (req, res) => {
   res.status(200).json({ linkData });
 });
 
+router.put('/:id', authenticateUser, async (req, res) => {
+  const {error, status} = await Link.updateByReq(req);
+  if (error) return res.status(status).json({ error });
+  res.status(204).end();
+});
+
 // DELETE /user/links/:id
 // @desc Delete a particular link posted by user
 /**
