@@ -158,6 +158,61 @@ router.get('/:id', authenticateUser, async (req, res) => {
   res.status(200).json({ linkData });
 });
 
+// PUT /user/links/:id
+// @desc Update a particular link posted by user
+
+/** 
+ * @swagger
+ * /user/links/{id}:
+ *  put:
+ *    tags:
+ *      - User's links
+ *    summary: Update link's properties
+ *    description: Authorization is obligatory, because only the user who posted the link can make changes to it
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              expired:
+ *                type: boolean
+ *                description: Determines whether the link is marked as expired or not. If the link expired due to maxClicks or expiresAt properties, you must change them as well.
+ *              maxClicks:
+ *                type: number
+ *                example: 42
+ *                description: The maximum number of times the link can be used before it expires
+ *              expiresAt:
+ *                type: string
+ *                format: date
+ *                example: 2077-10-23
+ *                description: Date after which the link will not work
+ *    security:
+ *      - bearerAuth: []
+ *    responses:
+ *      204:
+ *        description: Update was successful
+ *      400:
+ *        description: Provided parameters are invalid
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#components/schemas/Error'
+ *      404:
+ *        description: Could not find link'
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#components/schemas/Error'
+ *      500:
+ *        description: Server problem
+ *        content:
+ *          application/json:
+ *            schema:
+ *              $ref: '#components/schemas/Error'
+ */
+
 router.put('/:id', authenticateUser, async (req, res) => {
   const {error, status} = await Link.updateByReq(req);
   if (error) return res.status(status).json({ error });
