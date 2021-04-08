@@ -9,7 +9,7 @@ const validateParams = ({ expired, expiresAt, maxClicks }) => {
   if (expired && typeof expired !== 'boolean') return error;
   if (maxClicks && !(typeof maxClicks === 'number' && maxClicks > 0))
     return error;
-  if (expiresAt && !!isNaN(new Date(expiresAt))) return error;
+  if (expiresAt && isNaN(new Date(expiresAt))) return error;
 };
 
 const removeEmptyPairs = (obj) => {
