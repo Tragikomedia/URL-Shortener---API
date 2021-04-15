@@ -3,6 +3,7 @@ const getLinkData = (link, mode = 'brief') => {
   data.targetURL = link.targetURL;
   data.shortURI = link.shortURI;
   data.id = link._id;
+  data.expired = link.expired;
   if (mode === 'exhaustive') {
     data.expiresAt = link.expiresAt;
     data.maxClicks = link.maxClicks;
