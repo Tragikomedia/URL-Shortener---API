@@ -2,7 +2,6 @@ const router = require('express').Router();
 const logger = require('../helpers/logger');
 const { validURL } = require('../helpers/validation');
 const { attemptAuthetication } = require('../middlewares/auth');
-const { updateLinkStats } = require('../helpers/linkStats');
 const Link = require('../models/link');
 
 /**
@@ -55,10 +54,10 @@ const Link = require('../models/link');
  *          type: string
  *          description: Error message
  */
- 
+
 // POST /
 // @desc Post link you want to have shortened
-/** 
+/**
  * @swagger
  * /:
  *  post:
@@ -141,7 +140,7 @@ router.get('/:id', async (req, res) => {
   res.redirect(`https://${url}`);
   // Useful only for stats or click-related expiration
   if (link.user || link.maxClicks) {
-    const { error } = await updateLinkStats(req, link);
+    const { error } = await Link.updateStats(req, link);
     if (error) logger.error(`Could not save updated data: ${error}`);
   }
 });
