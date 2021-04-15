@@ -45,6 +45,9 @@ const { extractData, getLinkData } = require('../helpers/linkData');
  *                          type: string
  *                          description: Link to the website user wants others to access when using the shorter one
  *                          example: www.google.com
+ *                        expired:
+ *                          type: boolean
+ *                          description: If true, shortURI is not going to redirect the user to the target
  *                    
  *       401:
  *         description: Unauthorized - you must provide a valid JWT corresponding to an existing user
@@ -107,6 +110,9 @@ router.get('/', authenticateUser, async (req, res) => {
  *                        type: string
  *                        description: Link to the website user wants others to access when using the shorter one
  *                        example: www.google.com
+ *                      expired:
+ *                        type: boolean
+ *                        description: If true, shortURI is not going to redirect the user to the target
  *                      expiresAt:
  *                        type: string
  *                        nullable: true
