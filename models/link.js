@@ -1,5 +1,6 @@
 const { Schema, model } = require('mongoose');
 const { getLinkParams, getUpdateParams } = require('../helpers/linkParams');
+const Click = require('./click');
 
 const linkSchema = new Schema({
   targetURL: {
@@ -94,13 +95,26 @@ linkSchema.statics.fromReq = async function (req) {
 };
 
 // Update
+linkSchema.statics.updateStats = async function (req, link) {
+  const click = Click.fromReq(req);
+  link.clicks.push(click.id);
+  try {
+    // Link has priority - important for expiration purposes
+    await link.save();
+    await click.save();
+  } catch (error) {
+    return { error };
+  }
+  return {};
+};
+
 linkSchema.statics.updateByReq = async function (req) {
   const { id } = req.params;
   const { user } = req;
   const { error, updateObj } = getUpdateParams(req);
   if (error) return { error, status: 400 };
   const link = await this.findOne({ user: user.id, shortURI: id });
-  if (!link) return {error: 'Could not find link', status: 404};
+  if (!link) return { error: 'Could not find link', status: 404 };
   try {
     await link.updateOne(updateObj);
     await link.save();
