@@ -57,6 +57,37 @@ describe('GET /user/links/', () => {
     expect(linksData.find((link) => link.targetURL === url1)).toBeTruthy();
     expect(linksData.find((link) => link.targetURL === url2)).toBeTruthy();
   });
+  it('Given a proper JWT of a valid user, returned links should include info about id, targetURL, shortURI and expiration', async () => {
+    // Creating a user is necessary due to authentication
+    const user = new User({
+      externalId: 'aabb546',
+      provider: 'Facebook',
+      name: 'Somebody',
+    });
+    await user.save();
+    const token = signJWT(user);
+    // Post links
+    const url1 = 'wykop.pl';
+    await request
+      .post('/')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', `Bearer ${token}`)
+      .send({ url: url1 });
+    // Get a list of links
+    const res = await request
+      .get('/user/links/')
+      .set('Content-Type', 'application/json')
+      .set('Authorization', `Bearer ${token}`);
+    const { linksData } = res.body;
+    expect(linksData.length).toBe(1);
+    expect(Object.keys(linksData[0]).length).toBe(4);
+    const { targetURL, expired, id, shortURI } = linksData[0];
+    expect(targetURL).toBeDefined();
+    expect(shortURI).toBeDefined();
+    expect(id).toBeDefined();
+    expect(expired).toBeDefined();
+    expect(expired).toBe(false);
+  });
   it('Given a JWT pointing at a invalid user, should get status Unauthorized', async () => {
     const user = new User({
       externalId: 'aueufe',
