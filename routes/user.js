@@ -48,7 +48,7 @@ const { extractData, getLinkData } = require('../helpers/linkData');
  *                        expired:
  *                          type: boolean
  *                          description: If true, shortURI is not going to redirect the user to the target
- *                    
+ *
  *       401:
  *         description: Unauthorized - you must provide a valid JWT corresponding to an existing user
  *       500:
@@ -129,7 +129,7 @@ router.get('/', authenticateUser, async (req, res) => {
  *                        items:
  *                          type: object
  *                          properties:
- *                            time: 
+ *                            time:
  *                              type: string
  *                              format: date
  *                              example: 2021-03-16T15:26:41.259Z
@@ -144,7 +144,7 @@ router.get('/', authenticateUser, async (req, res) => {
  *                              example: 192.0.0.64
  *                              description: IP address from which the request was made
  *       400:
- *         description: Something went wrong - either user id or uri must be malformatted        
+ *         description: Something went wrong - either user id or uri must be malformatted
  *       401:
  *         description: Unauthorized - you must provide a valid JWT corresponding to an existing user
  *       404:
@@ -167,7 +167,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
 // PUT /user/links/:id
 // @desc Update a particular link posted by user
 
-/** 
+/**
  * @swagger
  * /user/links/{id}:
  *  put:
@@ -196,6 +196,12 @@ router.get('/:id', authenticateUser, async (req, res) => {
  *                description: Date after which the link will not work
  *    security:
  *      - bearerAuth: []
+ *    parameters:
+ *      - in: path
+ *        name: id
+ *        type: string
+ *        required: true
+ *        description: Uri id of a link stored in the database
  *    responses:
  *      204:
  *        description: Update was successful
@@ -220,7 +226,7 @@ router.get('/:id', authenticateUser, async (req, res) => {
  */
 
 router.put('/:id', authenticateUser, async (req, res) => {
-  const {error, status} = await Link.updateByReq(req);
+  const { error, status } = await Link.updateByReq(req);
   if (error) return res.status(status).json({ error });
   res.status(204).end();
 });
@@ -247,7 +253,7 @@ router.put('/:id', authenticateUser, async (req, res) => {
  *       204:
  *        description: Link does not exist in the database any longer
  *       400:
- *         description: Something went wrong - either user id or uri must be malformatted        
+ *         description: Something went wrong - either user id or uri must be malformatted
  *       401:
  *         description: Unauthorized - you must provide a valid JWT corresponding to an existing user
  *       500:
@@ -256,7 +262,7 @@ router.put('/:id', authenticateUser, async (req, res) => {
  *          application/json:
  *           schema:
  *            $ref: '#components/schemas/Error'
- *        
+ *
  */
 router.delete('/:id', authenticateUser, async (req, res) => {
   const { id } = req.params;
